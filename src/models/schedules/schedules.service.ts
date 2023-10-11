@@ -7,19 +7,20 @@ export class SchedulesService {
   constructor(private httpService: HttpService) {}
 
   private readonly logger = new Logger(SchedulesService.name)
-  private readonly storeRefreshTimes = ['12:00', '12:04', '16:00', '16:04', '20:00', '20:04']
+  private readonly storeRefreshTimes = ['12:00', '12:04', '16:00', '16:04', '20:00', '20:04', '18:32']
   private readonly stallRefreshTimes = ['23:55', '00:00']
 
   @Cron('0 * * * * *')
   async tradeRefresh() {
     const currentDate = new Date()
-    this.logger.log(`currentDate: ${currentDate}`)
+    const dateString = `${currentDate.toLocaleDateString('en-GB')}`
     const timeString = `${currentDate.toLocaleTimeString('en-GB', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'Asia/Bangkok',
     })}`
+    this.logger.log(`${dateString} ${timeString}`)
     if (this.storeRefreshTimes.includes(timeString)) {
       const minutes = parseInt(this.storeRefreshTimes.find((time) => time == timeString)?.slice(-2))
       if (!isNaN(minutes)) {
