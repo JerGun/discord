@@ -21,28 +21,33 @@ export class SchedulesService {
       timeZone: 'Asia/Bangkok',
     })}`
     this.logger.log(`${dateString} ${timeString}`)
-    if (this.storeRefreshTimes.includes(timeString)) {
-      const minutes = parseInt(this.storeRefreshTimes.find((time) => time == timeString)?.slice(-2))
-      if (!isNaN(minutes)) {
-        const content = `${process.env.MEMBER_ROLE} ดึงการ์ด อีก ${5 - minutes} นาที`
-        this.sendMessage(content)
+    try {
+      if (this.storeRefreshTimes.includes(timeString)) {
+        const minutes = parseInt(this.storeRefreshTimes.find((time) => time == timeString)?.slice(-2))
+        if (!isNaN(minutes)) {
+          const content = `${process.env.MEMBER_ROLE} ดึงการ์ด อีก ${5 - minutes} นาที`
+          this.sendMessage(process.env.WEBHOOK_REMINDER, content)
+        }
       }
-    }
-    if (this.stallRefreshTimes.includes(timeString)) {
-      const minutes = parseInt(this.stallRefreshTimes.find((time) => time == timeString)?.slice(-2))
-      const timeDiffText = !isNaN(minutes) && minutes != 0 ? `อีก ${60 - minutes} นาที` : ''
-      if (!isNaN(minutes)) {
-        const content = `${process.env.MEMBER_ROLE} ขายของ ${timeDiffText}`
-        this.sendMessage(content)
+      if (this.stallRefreshTimes.includes(timeString)) {
+        const minutes = parseInt(this.stallRefreshTimes.find((time) => time == timeString)?.slice(-2))
+        const timeDiffText = !isNaN(minutes) && minutes != 0 ? `อีก ${60 - minutes} นาที` : ''
+        if (!isNaN(minutes)) {
+          const content = `${process.env.MEMBER_ROLE} ขายของ ${timeDiffText}`
+          this.sendMessage(process.env.WEBHOOK_REMINDER, content)
+        }
       }
+    } catch (error) {
+      this.logger.error(error.message)
+      this.sendMessage(process.env.WEBHOOK_ERROR, `${process.env.OWNER} Webhook error with message: ${error.message}`)
     }
   }
 
-  async sendMessage(content: any) {
-    await this.httpService.axiosRef.post(
-      process.env.WEBHOOK_REMINDER,
-      { content: content },
-      { headers: { 'Content-Type': 'application/json; charset=UTF-8' } },
-    )
+  async sendMessage(url: string, content: any) {
+    await this.httpService.axiosRef
+      .post(url, { content: content }, { headers: { 'Content-Type': 'application/json; charset=UTF-8' } })
+      .then(() => {
+        this.logger.error('Send message success')
+      })
   }
 }
