@@ -24,7 +24,7 @@ export class SchedulesService {
     if (this.storeRefreshTimes.includes(timeString)) {
       const minutes = parseInt(this.storeRefreshTimes.find((time) => time == timeString)?.slice(-2))
       if (!isNaN(minutes)) {
-        const content = `${process.env.MEMBER_ROLE} ดึงการ์ด อีก ${5 - minutes} นาที}`
+        const content = `${process.env.MEMBER_ROLE} ดึงการ์ด อีก ${5 - minutes} นาที`
         this.sendMessage(content)
       }
     }
