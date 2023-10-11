@@ -1,17 +1,19 @@
 import { HttpService } from '@nestjs/axios'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 
 @Injectable()
 export class SchedulesService {
   constructor(private httpService: HttpService) {}
 
+  private readonly logger = new Logger(SchedulesService.name)
   private readonly storeRefreshTimes = ['12:00', '12:04', '16:00', '16:04', '20:00', '20:04']
   private readonly stallRefreshTimes = ['23:55', '00:00']
 
-  @Cron('*/10 * * * * *')
+  @Cron('0 * * * * *')
   async tradeRefresh() {
     const currentDate = new Date()
+    this.logger.log(`currentDate: ${currentDate}`)
     const timeString = `${currentDate.toLocaleTimeString('en-GB', {
       hour12: false,
       hour: '2-digit',
