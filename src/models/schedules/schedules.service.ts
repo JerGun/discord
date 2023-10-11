@@ -7,7 +7,7 @@ export class SchedulesService {
   constructor(private httpService: HttpService) {}
 
   private readonly logger = new Logger(SchedulesService.name)
-  private readonly storeRefreshTimes = ['12:00', '12:04', '16:00', '16:04', '20:00', '20:04', '18:32']
+  private readonly storeRefreshTimes = ['12:00', '12:04', '16:00', '16:04', '20:00', '20:04']
   private readonly stallRefreshTimes = ['23:55', '00:00']
 
   @Cron('0 * * * * *')
