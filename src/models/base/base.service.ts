@@ -9,16 +9,15 @@ import {
   In,
   Repository,
   SelectQueryBuilder,
-  UpdateResult
+  UpdateResult,
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 import { PaginatedResultDto, PaginationParamsDto } from './dto/base.dto'
-import { BaseDocument } from './entities/base.entity'
 
 type ModelPropertyOf<T> = PropertyOf<T>
 
 @Injectable()
-export class BaseService<T extends BaseDocument> {
+export class BaseService<T> {
   constructor(@InjectRepository(Repository) private repo: Repository<T>) {}
 
   async save(data: DeepPartial<T>): Promise<T> {
@@ -39,7 +38,7 @@ export class BaseService<T extends BaseDocument> {
   }
 
   public async findOne(data: RequireAtLeastOne<ModelPropertyOf<T>>): Promise<T> {
-    return this.repo.findOne(data as any).then((result: T) => {
+    return this.repo.findOne({ where: data as any }).then((result: T) => {
       if (!result) throw new NotFoundException()
       return result
     })
@@ -70,58 +69,58 @@ export class BaseService<T extends BaseDocument> {
     })
   }
 
-  async getIds(condition?: any): Promise<number[]> {
-    return await (
-      await this.repo.find({
-        where: condition,
-        select: ['id'],
-      })
-    ).map((res) => res.id)
-  }
+  // async getIds(condition?: any): Promise<number[]> {
+  //   return await (
+  //     await this.repo.find({
+  //       where: condition,
+  //       select: ['id'],
+  //     })
+  //   ).map((res) => res.id)
+  // }
 
-  public async findByIds(ids: BaseDocument['id'][]): Promise<T[]> {
-    return await this.repo.createQueryBuilder().where('id IN (:...ids)', { ids: ids }).getMany()
-  }
+  // public async findByIds(ids: BaseDocument['id'][]): Promise<T[]> {
+  //   return await this.repo.createQueryBuilder().where('id IN (:...ids)', { ids: ids }).getMany()
+  // }
 
   public async findCount(data: RequireAtLeastOne<ModelPropertyOf<T>>): Promise<number> {
     return await this.repo.createQueryBuilder().where(data).getCount()
   }
 
-  async findOneById(id: BaseDocument['id']): Promise<T> {
-    return await this.repo.findOne({ where: { id: id as any } }).then((result: T) => {
-      if (!result) throw new NotFoundException()
-      return result
-    })
-  }
+  // async findOneById(id: BaseDocument['id']): Promise<T> {
+  //   return await this.repo.findOne({ where: { id: id as any } }).then((result: T) => {
+  //     if (!result) throw new NotFoundException()
+  //     return result
+  //   })
+  // }
 
-  async updateOneById(id: BaseDocument['id'], data: QueryDeepPartialEntity<ExtractModel<T>>): Promise<T> {
-    const result = await this.repo.findOne({ where: { id: id as any } })
-    return await this.repo.update(id, data as any).then((res) => {
-      if (!res) throw new NotFoundException()
-      return { ...result, ...data }
-    })
-  }
+  // async updateOneById(id: BaseDocument['id'], data: QueryDeepPartialEntity<ExtractModel<T>>): Promise<T> {
+  //   const result = await this.repo.findOne({ where: { id: id as any } })
+  //   return await this.repo.update(id, data as any).then((res) => {
+  //     if (!res) throw new NotFoundException()
+  //     return { ...result, ...data }
+  //   })
+  // }
 
-  async updateOneByUniqueName(
-    uniqueName: BaseDocument['uniqueName'],
-    data: QueryDeepPartialEntity<ExtractModel<T>>,
-  ): Promise<T> {
-    const result = await this.repo.findOne({ where: { uniqueName: uniqueName as any } })
-    return await this.repo.update(result.id, data as any).then((res) => {
-      if (!res) throw new NotFoundException()
-      return { ...result, ...data }
-    })
-  }
+  // async updateOneByUniqueName(
+  //   uniqueName: BaseDocument['uniqueName'],
+  //   data: QueryDeepPartialEntity<ExtractModel<T>>,
+  // ): Promise<T> {
+  //   const result = await this.repo.findOne({ where: { uniqueName: uniqueName as any } })
+  //   return await this.repo.update(result.id, data as any).then((res) => {
+  //     if (!res) throw new NotFoundException()
+  //     return { ...result, ...data }
+  //   })
+  // }
 
-  async updateManyById(
-    ids: BaseDocument['id'][],
-    data: QueryDeepPartialEntity<ExtractModel<T>>,
-  ): Promise<UpdateResult> {
-    return await this.repo.update(ids, data as any).then((res) => {
-      if (!res) throw new NotFoundException()
-      return res
-    })
-  }
+  // async updateManyById(
+  //   ids: BaseDocument['id'][],
+  //   data: QueryDeepPartialEntity<ExtractModel<T>>,
+  // ): Promise<UpdateResult> {
+  //   return await this.repo.update(ids, data as any).then((res) => {
+  //     if (!res) throw new NotFoundException()
+  //     return res
+  //   })
+  // }
 
   async updateManyCondition(
     conditions: FindOptionsWhere<T>,
@@ -133,12 +132,12 @@ export class BaseService<T extends BaseDocument> {
     })
   }
 
-  async deleteOneById(id: BaseDocument['id']): Promise<any> {
-    return await this.repo.delete({ id: id as any }).then((res) => {
-      if (!res || res.affected == 0) throw new NotFoundException()
-      return res
-    })
-  }
+  // async deleteOneById(id: BaseDocument['id']): Promise<any> {
+  //   return await this.repo.delete({ id: id as any }).then((res) => {
+  //     if (!res || res.affected == 0) throw new NotFoundException()
+  //     return res
+  //   })
+  // }
 
   async deleteOneByCondition(conditions: FindOptionsWhere<T>): Promise<any> {
     return await this.repo.delete(conditions).then((res) => {
@@ -147,13 +146,13 @@ export class BaseService<T extends BaseDocument> {
     })
   }
 
-  async deleteByIds(ids: BaseDocument['id'][]): Promise<any> {
-    if (ids.length == 0) return []
-    return await this.repo.delete({ id: In(ids) as any }).then((res) => {
-      if (!res || res.affected == 0) throw new NotFoundException()
-      return res
-    })
-  }
+  // async deleteByIds(ids: BaseDocument['id'][]): Promise<any> {
+  //   if (ids.length == 0) return []
+  //   return await this.repo.delete({ id: In(ids) as any }).then((res) => {
+  //     if (!res || res.affected == 0) throw new NotFoundException()
+  //     return res
+  //   })
+  // }
 
   async getSimplePaginatedResult(
     conditions?: FindManyOptions<T>,
